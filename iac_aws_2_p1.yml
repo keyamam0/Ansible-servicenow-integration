@@ -1,0 +1,25 @@
+#
+# Terraform Run
+#
+- hosts: localhost
+  tasks:
+    - name: Terraform Run
+      community.general.terraform:
+      #https://docs.ansible.com/ansible/latest/collections/community/general/terraform_module.html
+      #cloud.terraform.terraform:
+
+        project_path: 'terraform/'
+        state: present
+        force_init: yes
+        init_reconfigure: yes
+        variables_files: "./tf.tfvars"
+        backend_config:
+          region: "ap-northeast-1"
+          bucket: "keyama-terraform-s3"
+          key: "{{ my_tf_key }}"
+        variables: 
+           TF_VAR_tag: "{{ my_tf_key }}"
+           TF_VAR_expire: "{{ lookup('pipe', 'date --date \"1 days\" +%Y-%m-%d') }}"
+
+    - name: Inventory Update
+      ansible.builtin.meta: refresh_inventory

@@ -1,0 +1,118 @@
+#
+# EC2 Config
+#
+- hosts: tag_myGroup_{{ my_tf_key }}
+  remote_user: ec2-user
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Wait for SSH connection
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather fact
+      ansible.builtin.setup:
+
+    - name: httpd Install
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+
+    - name: httpd Launch
+      ansible.builtin.systemd:
+        name: httpd.service
+        enabled: yes
+        state: started
+        
+    - name: Fetch custom front page from GitHub
+      get_url:
+        url: https://raw.githubusercontent.com/Loopple/Landings/main/loopple-ecommerce-gift-shop-landing-page/index.html
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Ensure git is installed
+      yum:
+        name: git
+        state: present
+
+    - name: Clone the GitHub repository to a temporary directory
+      git:
+        repo: 'https://github.com/Loopple/Landings.git'
+        dest: '/tmp/Loopple-Landings'
+        clone: yes
+        update: yes
+
+    - name: Copy the assets folder to the desired location
+      ansible.builtin.copy:
+        src: '/tmp/Loopple-Landings/loopple-ecommerce-gift-shop-landing-page/assets/'
+        dest: '/var/www/html/assets/'
+        remote_src: yes
+        directory_mode: yes
+        
+    - name: Remove the temporary directory
+      file:
+        path: '/tmp/Loopple-Landings'
+        state: absent
+        
+    - name: Restart httpd to apply changes
+      service:
+        name: httpd
+        state: restarted
+        
+    - name: Temp password Create
+      set_fact:
+        random_password: "{{ lookup('community.general.random_string', length=12, charset='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@') }}"
+
+    - name: Temp password Set
+      user:
+        name: "hatdemo"
+        state: present
+        createhome: yes
+        shell: /bin/bash
+        password: "{{ random_password | password_hash('sha512') }}"
+        update_password: always
+
+    - name: SSHD Config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        backrefs: yes
+      with_items:
+        - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication yes' }
+        - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 120' }
+        - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveInterval 3' }
+
+    - name: SSHD Restart
+      service:
+        name: sshd
+        state: restarted
+
+    - name: Temp password Set expiration
+      shell: chage -d 0 hatdemo
+
+#
+# Notification
+#
+- hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Send message
+      slack:
+        token: "{{ slack_token }}"
+        channel: "{{ slack_channel }}"
+        msg: |
+          Ansible Automation Platformより
+          以下のSandbox環境の準備が完了しました( 管理番号 {{ my_tf_key }} )
+
+    - name: Send message
+      slack:
+        token: "{{ slack_token }}"
+        channel: "{{ slack_channel }}"
+        msg: | 
+          >{{ item }} 
+          >{{ hostvars[item].random_password }}
+      loop: "{{ groups['tag_myGroup_' + my_tf_key] }}"
+      vars:
+        item: "{{ inventory_hostname }}"
