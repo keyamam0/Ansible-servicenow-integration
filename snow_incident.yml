@@ -6,7 +6,7 @@
 
   tasks:
   - name: Create an incident
-    servicenow.itsm.now:
+    servicenow.itsm.api:
       state: present
       table: incident
       username: "{{ sn_username }}"
