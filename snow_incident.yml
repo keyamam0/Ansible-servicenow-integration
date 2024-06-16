@@ -4,6 +4,9 @@
   gather_facts: no
   connection: local
 
+  vars:
+    target_ip: "{{ ansible_eda.event.payload.host_ip | default('NA') }}"
+
   tasks:
   - name: Create an incident
     servicenow.itsm.incident:
@@ -14,7 +17,8 @@
 
       state: new
       caller: David.Miller
-      short_description: User is not receiving email
+      # short_description: User is not receiving email
+      short_description: "{{ target_ip }}"
       description: User has been unable to receive email for the past 15 minutes
-      impact: low
-      urgency: low
+      impact: high
+      urgency: high
