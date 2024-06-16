@@ -18,7 +18,7 @@
       state: new
       caller: David.Miller
       # short_description: User is not receiving email
-      short_description: "{{ target_ip }}"
+      short_description: "{{ target_ip }} DOWN"
       description: User has been unable to receive email for the past 15 minutes
       impact: high
       urgency: high
