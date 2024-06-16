@@ -13,7 +13,7 @@
         password: "{{ sn_password }}"
 
       state: new
-      caller: some.user
+      caller: David.Miller
       short_description: User is not receiving email
       description: User has been unable to receive email for the past 15 minutes
       impact: low
