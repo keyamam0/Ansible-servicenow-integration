@@ -94,25 +94,25 @@
 #
 # Notification
 #
-- hosts: localhost
-  gather_facts: false
+# - hosts: localhost
+#   gather_facts: false
 
-  tasks:
-    - name: Send message
-      slack:
-        token: "{{ slack_token }}"
-        channel: "{{ slack_channel }}"
-        msg: |
-          Ansible Automation Platformより
-          以下のSandbox環境の準備が完了しました( 管理番号 {{ my_tf_key }} )
+#   tasks:
+#     - name: Send message
+#       slack:
+#         token: "{{ slack_token }}"
+#         channel: "{{ slack_channel }}"
+#         msg: |
+#           Ansible Automation Platformより
+#           以下のSandbox環境の準備が完了しました( 管理番号 {{ my_tf_key }} )
 
-    - name: Send message
-      slack:
-        token: "{{ slack_token }}"
-        channel: "{{ slack_channel }}"
-        msg: | 
-          >{{ item }} 
-          >{{ hostvars[item].random_password }}
-      loop: "{{ groups['tag_myGroup_' + my_tf_key] }}"
-      vars:
-        item: "{{ inventory_hostname }}"
+#     - name: Send message
+#       slack:
+#         token: "{{ slack_token }}"
+#         channel: "{{ slack_channel }}"
+#         msg: | 
+#           >{{ item }} 
+#           >{{ hostvars[item].random_password }}
+#       loop: "{{ groups['tag_myGroup_' + my_tf_key] }}"
+#       vars:
+#         item: "{{ inventory_hostname }}"
