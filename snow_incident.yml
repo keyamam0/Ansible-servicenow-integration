@@ -6,19 +6,15 @@
 
   tasks:
   - name: Create an incident
-    servicenow.itsm.api:
-      state: present
-      table: incident
-      username: "{{ sn_username }}"
-      password: "{{ sn_password }}"
-      instance: "{{ sn_instance }}"
-      data:
-        impact: "{{ sn_impact }}"
-        urgency: "{{ sn_urgency }}"
-        priority: "{{ sn_priority }}"
-        short_description: "This is a test incident opened by Ansible"
-        description: "Detailed description of the incident."
-    register: new_incident
+    servicenow.itsm.incident:
+      instance:
+        host: "{{ sn_instance }}"
+        username: "{{ sn_username }}"
+        password: "{{ sn_password }}"
 
-  - debug: 
-      var: new_incident.record
+      state: new
+      caller: some.user
+      short_description: User is not receiving email
+      description: User has been unable to receive email for the past 15 minutes
+      impact: low
+      urgency: low
