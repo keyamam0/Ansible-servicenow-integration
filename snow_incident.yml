@@ -8,6 +8,10 @@
     target_ip: "{{ ansible_eda.event.payload.host_ip | default('NA') }}"
 
   tasks:
+  - name: Show vars
+    debug:
+      msg: "{{target_ip}}"  
+
   - name: Create an incident
     servicenow.itsm.incident:
       instance:
