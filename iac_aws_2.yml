@@ -15,7 +15,7 @@
         variables_files: "./tf.tfvars"
         backend_config:
           region: "ap-northeast-1"
-          bucket: "keyamamo-demo3"
+          bucket: "demo-keyamamo"
           key: "{{ my_tf_key }}"
         variables: 
            TF_VAR_tag: "{{ my_tf_key }}"
@@ -100,46 +100,4 @@
     #   set_fact:
     #     ec2hosts: "tag_myGroup_{{ my_tf_key }}"
 
-#
-# Notification
-#
-- hosts: localhost
-  gather_facts: false
-
-  # vars:
-  #  slack_token : xxx
-
-  tasks:
-    # - name: Retrieve EC2 instance information
-    #   ec2_instance_info:
-    #     filters:
-    #       "tag:myGroup": "{{ my_tf_key }}"
-    #   register: ec2_info
-
-    - name: Send message
-      slack:
-        token: "{{ slack_token }}"
-        # channel: '#ansible-demo'
-        channel: "{{ slack_channel }}"
-        msg: |
-          Ansible Automation Platformより
-          以下のSandbox環境の準備が完了しました( 管理番号 {{ my_tf_key }} )
-
-    - name: Send message
-      slack:
-        token: "{{ slack_token }}"
-        # channel: '#ansible-demo'
-        channel: "{{ slack_channel }}"
-        msg: | 
-          >{{ itemi }} 
-          >{{ hostvars[itemi].random_password }}
-      loop: "{{ groups['tag_myGroup_' + my_tf_key] }}"
-      loop_control:
-        loop_var: itemi
-      vars:
-        itemi: "{{ inventory_hostname }}"
-
-    # - name: Print instance public IP addresses
-    #   debug:
-    #     var: ec2_info.instances | map(attribute='public_ip_address') | list
 
