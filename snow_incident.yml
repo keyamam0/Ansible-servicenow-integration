@@ -1,0 +1,24 @@
+---
+- name: Create incident with notes
+  hosts: localhost
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: Create an incident
+    snow_record:
+      state: present
+      table: incident
+      username: "{{ sn_username }}"
+      password: "{{ sn_password }}"
+      instance: "{{ sn_instance }}"
+      data:
+        impact: "{{ sn_impact }}"
+        urgency: "{{ sn_urgency }}"
+        priority: "{{ sn_priority }}"
+        short_description: "This is a test incident opened by Ansible"
+        description: "Detailed description of the incident."
+    register: new_incident
+
+  - debug: 
+      var: new_incident.record
